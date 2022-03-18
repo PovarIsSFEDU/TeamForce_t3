@@ -3,6 +3,8 @@
 *.iws
 *.iml
 *.ipr
+*.pyc
+*.pyo
 
 ### NetBeans ###
 /nbproject/private/
@@ -16,6 +18,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### ENV ###
-.env

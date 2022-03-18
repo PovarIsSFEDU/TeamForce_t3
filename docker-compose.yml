@@ -1,0 +1,27 @@
+version: "3.7"
+
+
+volumes:
+  postgres_data:
+
+services:
+  bot-api:
+    image: bot:0.1
+    restart: unless-stopped
+    env_file:
+      - ./postgres-prodution.env
+      - .env.sample
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+      network: host
+
+  db-postgres:
+    image: postgres:12.2
+    restart: unless-stopped
+    env_file:
+      - ./postgres-prodution.env
+    ports:
+      - "8002:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
