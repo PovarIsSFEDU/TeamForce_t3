@@ -8,7 +8,7 @@ import logging
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
 
 from help import extract_unique_code
-from keyboard import start_keyboard_admin, start_keyboard_user, help_callback_keyboard
+from keyboard import start_keyboard_admin, start_keyboard_user, help_callback_keyboard, check_rules
 
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
@@ -49,19 +49,6 @@ def start_bot(message):
     msg_json = message.json
     username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
     AUTH_ADMIN = check_auth(username)
-    if AUTH_ADMIN:
-        menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
-                {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-                {'text': "О создателях", 'callback_data': "creators"}]
-    else:
-        menu = [{'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-                {'text': "О создателях", 'callback_data': "creators"}]
-
-    for point in menu:
-        point["callback_data"] = "&target=" + point["callback_data"] + "$start"
-
-    keyboard = Keyboa(items=menu)
-
     last_name = msg_json["from"].get("last_name")
     if get_user_id(username) is None:
         id_ = select_max_id(Users)
@@ -70,7 +57,7 @@ def start_bot(message):
                phone="")
     bot.send_message(chat_id=message.chat.id,
                      text="Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>",
-                     reply_markup=keyboard())
+                     reply_markup=check_rules(AUTH_ADMIN))
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_topic"))
@@ -119,19 +106,9 @@ def goback_callback(call):
         msg_json = call.message.json
         username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
         AUTH_ADMIN = check_auth(username)
-        if AUTH_ADMIN:
-            menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
-                    {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-                    {'text': "О создателях", 'callback_data': "creators"}]
-        else:
-            menu = [{'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-                    {'text': "О создателях", 'callback_data': "creators"}]
-        for point in menu:
-            point["callback_data"] = "&target=" + point["callback_data"] + "$start"
         text = "Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>"
-    keyboard = Keyboa(items=menu)
     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=text,
-                          reply_markup=keyboard())
+                          reply_markup=check_rules(AUTH_ADMIN))
 
 
 # Расположение клавиатуры для одной команды
