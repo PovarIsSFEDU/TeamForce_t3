@@ -8,6 +8,11 @@ def insert(model, **kwargs):
     db_session.commit()
 
 
+def update(model, id_, **kwargs):
+    db_session.query(model).filter(model.id == id_).update(**kwargs)
+    db_session.commit()
+
+
 def convert_to_list(func):
     def foo(*args, **kwargs):
         res = func(*args, **kwargs)
