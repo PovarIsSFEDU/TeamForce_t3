@@ -16,6 +16,7 @@ telebot.logger.setLevel(logging.INFO)
 
 teams = db_session.execute(select(Topic))
 teams_count = sum(1 for _ in teams)
+AUTH_ADMIN = False
 
 
 def get_user_id(username):
@@ -23,15 +24,34 @@ def get_user_id(username):
     return res[0].get("id") if res else None
 
 
+def check_auth(username):
+    res = select_all(Users, Users.username == username)
+    return res[0].get("admin") if res else False
+
+
+def auth(func):
+    if AUTH_ADMIN:
+        def foo(*args, **kwargs):
+            func(*args, **kwargs)
+        return foo()
+    else:
+        _ = lambda *args: None
+        return _
+
+
 @bot.message_handler(commands=['start', 'help'])
 def start_bot(message):
-    menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
-            {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-            {'text': "О создателях", 'callback_data': "creators"}]
-    keyboard = Keyboa(items=menu)
     msg_json = message.json
-    username = msg_json["from"].get("username")
-    first_name = msg_json["from"].get("first_name")
+    username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
+    AUTH_ADMIN = check_auth(username)
+    if AUTH_ADMIN:
+        menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
+                {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
+                {'text': "О создателях", 'callback_data': "creators"}]
+    else:
+        menu = [{'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
+                {'text': "О создателях", 'callback_data': "creators"}]
+    keyboard = Keyboa(items=menu)
     last_name = msg_json["from"].get("last_name")
     if get_user_id(username) is None:
         id_ = select_max_id(Users)
@@ -96,6 +116,7 @@ def all_topics(message):
 
 # Расположение клавиатуры для одной команды
 @bot.message_handler(commands=['check_team'])
+@auth
 def exact_topic(message):
     menu = ["Просмотреть сообщения", "Получить список пользователей", "Создать рассылку", "Получить ссылку",
             "Удалить команду/тэг", "Назад"]
