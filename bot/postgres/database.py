@@ -23,17 +23,19 @@ Model = declarative_base(name='Model')
 class Employ(Model):
     __tablename__ = 'employ'
     id = Column(Integer, primary_key=True)
-    name = Column(String(200))
-    surname = Column(String(200))
+    first_name = Column(String(200))
+    last_name = Column(String(200))
     username = Column(String(200))
     admin = Column(Boolean)
     phone = Column(String(30))
 
-    def __init__(self, employ_id, name, project_name, date_message):
+    def __init__(self, employ_id, first_name, last_name, username, admin, phone):
         self.id = employ_id
-        self.name = name
-        self.project_name = project_name
-        self.date_message = date_message
+        self.first_name = first_name
+        self.last_name = last_name
+        self.username = username
+        self.admin = admin
+        self.phone = phone
 
 
 class Theme(Model):

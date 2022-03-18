@@ -14,26 +14,27 @@ telebot.logger.addHandler(handler)
 telebot.logger.setLevel(logging.INFO)
 
 
-def insert_message(**kwargs):
-    obj = Employ(**kwargs)
+def insert(model, **kwargs):
+    obj = model(**kwargs)
     db_session.add(obj)
     db_session.commit()
 
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    name = message.json["from"].get("username")
-    msg = message.json.get("date")
-    insert_message(employ_id=1, name=name, project_name="АтласНКО", date_message=msg)
+    msg_json = message.json
+    username = msg_json["from"].get("username")
+    first_name = msg_json["from"].get("first_name")
+    last_name = msg_json["from"].get("last_name")
+    # insert(Employ, employ_id=1, first_name=first_name, last_name=last_name, username=username, admin=False, phone="")
     bot.reply_to(message, "Ботик жив и дразнит тебя")
 
 
-@bot.message_handler(commands=['users'])
-def get_users(message):
-    name = message.json["from"].get("username")
-    msg = message.json.get("date")
-    insert_message(employ_id=1, name=name, project_name="АтласНКО", date_message=msg)
-    bot.reply_to(message, "Ботик жив и дразнит тебя")
+# @bot.message_handler(commands=['users'])
+# def get_users(message):
+#     name = message.json["from"].get("username")
+#     msg = message.json.get("date")
+#     bot.reply_to(message, "Ботик жив и дразнит тебя")
 
 
 @bot.message_handler(func=lambda m: True)
