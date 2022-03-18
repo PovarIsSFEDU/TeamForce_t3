@@ -25,7 +25,9 @@ def get_user_id(username):
 
 @bot.message_handler(commands=['start', 'help'])
 def start_bot(message):
-    menu = ["Создать тэг/команду", "Список чатов", "Помощь", "О создателях"]
+    menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
+            {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
+            {'text': "О создателях", 'callback_data': "creators"}]
     keyboard = Keyboa(items=menu)
     msg_json = message.json
     username = msg_json["from"].get("username")
@@ -39,6 +41,43 @@ def start_bot(message):
     bot.send_message(chat_id=message.chat.id,
                      text="Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>",
                      reply_markup=keyboard())
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "help")
+def help_callback(call):
+    menu = [{'text': "Назад", 'callback_data': "back"}]
+    keyboard = Keyboa(items=menu)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                          text="Тут будет помощь по боту", reply_markup=keyboard())
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "create_topic")
+def create_topic_callback(call):
+    menu = [{'text': "Создать", 'callback_data': "push_topic"}, {'text': "Назад", 'callback_data': "back"}]
+    keyboard = Keyboa(items=menu)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                          text="Напишите название темы/команды/тэга: ", reply_markup=keyboard())
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "topics_list")
+def topics_list_callback(call):
+    if (teams_count == 0):
+        menu = [{'text': "Назад", 'callback_data': "back"}]
+        text = "Тэгов/команд пока что нет("
+    else:
+        menu = [{'text': x.name, 'callback_data': x.name} for x in teams] + [{'text': "Назад", 'callback_data': "back"}]
+        text = "А вот и список команд:"
+    keyboard = Keyboa(items=menu)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=text,
+                          reply_markup=keyboard())
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "creators")
+def creators_callback(call):
+    menu = [{'text': "Назад", 'callback_data': "back"}]
+    keyboard = Keyboa(items=menu)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                          text="Создатели: CyberFarshTeam", reply_markup=keyboard())
 
 
 # Расположение клавиатуры для всех созданных команд
