@@ -5,6 +5,8 @@ import sys
 import telebot
 from keyboa import Keyboa
 from postgres import db_session, User, Topic, Message, init_migrate
+import logging
+from buiesnes import insert, select_all, db_session, Employ, Theme, Message, init_migrate
 
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
@@ -16,12 +18,6 @@ telebot.logger.setLevel(logging.INFO)
 
 teams = db_session.execute(select(Topic))
 teams_count = sum(1 for _ in teams)
-
-
-def insert(model, **kwargs):
-    obj = model(**kwargs)
-    db_session.add(obj)
-    db_session.commit()
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -43,7 +39,7 @@ def all_topics(message):
         menu = [x.name for x in teams] + ["Назад"]
         text = "А вот и список команд:"
     keyboard = Keyboa(items=menu)
-    
+
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=keyboard())
 
 

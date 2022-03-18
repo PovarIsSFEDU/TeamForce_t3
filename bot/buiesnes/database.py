@@ -37,16 +37,29 @@ class User(Model):
         self.admin = admin
         self.phone = phone
 
+    def to_dict(self):
+        res = self.__dict__
+        if res.get("_sa_instance_state") is not None:
+            res.pop("_sa_instance_state")
+        return res
+
 
 class Topic(Model):
     __tablename__ = 'topic'
     id = Column(Integer, primary_key=True)
     name = Column(String(500))
+    url = Column(String(500))
 
-    def __init__(self, topic_id, name):
-        self.id = topic_id
+    def __init__(self, theme_id, name, url):
+        self.id = theme_id
         self.name = name
+        self.url = url
 
+    def to_dict(self):
+        res = self.__dict__
+        if res.get("_sa_instance_state") is not None:
+            res.pop("_sa_instance_state")
+        return res
 
 employ_theme = Table('user_topic', Model.metadata,
                      Column('user_id', ForeignKey('user.id')),
@@ -69,6 +82,12 @@ class Message(Model):
         self.name = name
         self.project_name = project_name
         self.date_message = date_message
+
+    def to_dict(self):
+        res = self.__dict__
+        if res.get("_sa_instance_state") is not None:
+            res.pop("_sa_instance_state")
+        return res
 
 
 def init_migrate():
