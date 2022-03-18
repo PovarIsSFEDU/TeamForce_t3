@@ -2,7 +2,7 @@ import telebot
 import os
 import sys
 import logging
-from postgres import db_session, Employ, init_migrate
+from postgres import db_session, Employ, Theme, Message, init_migrate
 
 
 init_migrate()
