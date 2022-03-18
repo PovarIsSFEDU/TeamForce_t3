@@ -3,8 +3,8 @@
 
 import os
 from sqlalchemy import create_engine, Column, Integer, String, Text, Date, Table, ForeignKey, Boolean
-from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 user = os.environ.get("POSTGRES_USER")
 psw = os.environ.get("POSTGRES_PASSWORD")
@@ -20,8 +20,8 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 Model = declarative_base(name='Model')
 
 
-class Employ(Model):
-    __tablename__ = 'employ'
+class User(Model):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     first_name = Column(String(200))
     last_name = Column(String(200))
@@ -29,8 +29,8 @@ class Employ(Model):
     admin = Column(Boolean)
     phone = Column(String(30))
 
-    def __init__(self, employ_id, first_name, last_name, username, admin, phone):
-        self.id = employ_id
+    def __init__(self, user_id, first_name, last_name, username, admin, phone):
+        self.id = user_id
         self.first_name = first_name
         self.last_name = last_name
         self.username = username
@@ -38,27 +38,27 @@ class Employ(Model):
         self.phone = phone
 
 
-class Theme(Model):
-    __tablename__ = 'theme'
+class Topic(Model):
+    __tablename__ = 'topic'
     id = Column(Integer, primary_key=True)
     name = Column(String(500))
 
-    def __init__(self, theme_id, name):
-        self.id = theme_id
+    def __init__(self, topic_id, name):
+        self.id = topic_id
         self.name = name
 
 
-employ_theme = Table('employ_theme', Model.metadata,
-                     Column('employ_id', ForeignKey('employ.id')),
-                     Column('theme_id', ForeignKey('theme.id'))
+employ_theme = Table('user_topic', Model.metadata,
+                     Column('user_id', ForeignKey('user.id')),
+                     Column('topic_id', ForeignKey('topic.id'))
                      )
 
 
 class Message(Model):
     __tablename__ = 'message'
     id = Column(Integer, primary_key=True)
-    theme_id = Column(Integer, ForeignKey('theme.id'))
-    employ_id = Column(Integer, ForeignKey('employ.id'))
+    topic_id = Column(Integer, ForeignKey('topic.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
     status = Column(String(50))
     type = Column(String(50))
     message_text = Column(Text)

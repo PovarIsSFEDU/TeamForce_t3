@@ -15,6 +15,8 @@ services:
       context: ./bot
       dockerfile: Dockerfile
       network: host
+    depends_on:
+      - db-postgres
 
   db-postgres:
     image: postgres:12.2
