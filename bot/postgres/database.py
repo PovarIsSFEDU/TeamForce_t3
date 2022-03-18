@@ -2,7 +2,7 @@
 
 
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Text, Date, Table, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Text, Date, Table, ForeignKey, Boolean
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -24,9 +24,10 @@ class Employ(Model):
     __tablename__ = 'employ'
     id = Column(Integer, primary_key=True)
     name = Column(String(200))
-    project_name = Column(String(200))
-    message = Column(Text)
-    date_message = Column(Date)
+    surname = Column(String(200))
+    username = Column(String(200))
+    admin = Column(Boolean)
+    phone = Column(String(30))
 
     def __init__(self, employ_id, name, project_name, date_message):
         self.id = employ_id
