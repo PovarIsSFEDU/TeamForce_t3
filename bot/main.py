@@ -24,60 +24,65 @@ teams_count = sum(1 for _ in teams)
 @bot.message_handler(commands=['start', 'help'])
 def start_bot(message):
     menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"}, {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"}, {'text': "О создателях", 'callback_data': "creators"}]
+    for point in menu:
+        point["callback_data"] = "&target=" + point["callback_data"] + "$start"
     keyboard = Keyboa(items=menu)
+    
     bot.send_message(chat_id=message.chat.id,
                      text="Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>",
                      reply_markup=keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "help")
-def help_callback(call):
-    menu = [{'text': "Назад", 'callback_data': "back"}]
-    keyboard = Keyboa(items=menu)
-    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Тут будет помощь по боту", reply_markup=keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "create_topic")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_topic"))
 def create_topic_callback(call):
-    menu = [{'text': "Создать", 'callback_data': "push_topic"}, {'text': "Назад", 'callback_data': "back"}]
+    menu = [{'text': "Создать", 'callback_data': "push_topic"}, {'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
     keyboard = Keyboa(items=menu)
     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Напишите название темы/команды/тэга: ", reply_markup=keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "topics_list")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=topics_list"))
 def topics_list_callback(call):
     if (teams_count == 0):
-        menu = [{'text': "Назад", 'callback_data': "back"}]
+        menu = [{'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
         text = "Тэгов/команд пока что нет("
     else:
-        menu = [{'text': x.name, 'callback_data': x.name} for x in teams] + [{'text': "Назад", 'callback_data': "back"}]
+        menu = [{'text': x.name, 'callback_data': x.name} for x in teams] + [{'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
         text = "А вот и список команд:"
     keyboard = Keyboa(items=menu)
     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=text, reply_markup=keyboard())
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "creators")
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=help"))
+def help_callback(call):
+    menu = [{'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
+    keyboard = Keyboa(items=menu)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Тут будет помощь по боту", reply_markup=keyboard())
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=creators"))
 def creators_callback(call):
-    menu = [{'text': "Назад", 'callback_data': "back"}]
+    menu = [{'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
     keyboard = Keyboa(items=menu)
     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Создатели: CyberFarshTeam", reply_markup=keyboard())
 
 
 
 
-
-#Расположение клавиатуры для всех созданных команд
-@bot.message_handler(commands=['teams', 'tags'])
-def all_topics(message):
-    if (teams_count == 0):
-        menu = ["Назад"]
-        text = "Тэгов/команд пока что нет("
-    else:
-        menu = [x.name for x in teams] + ["Назад"]
-        text = "А вот и список команд:"
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))
+def goback_callback(call):
+    parent = call.data.split("=")[1]
+    if parent == "start" :
+        menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"}, {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"}, {'text': "О создателях", 'callback_data': "creators"}]
+        for point in menu:
+            point["callback_data"] = "&target=" + point["callback_data"] + "$start"
+        text = "Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>"
     keyboard = Keyboa(items=menu)
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=text, reply_markup=keyboard())
 
-    bot.send_message(chat_id=message.chat.id, text=text, reply_markup=keyboard())
+
 
 
 #Расположение клавиатуры для одной команды
@@ -88,11 +93,6 @@ def exact_topic(message):
     text = "Вы выбрали тестовый тэг/команду для просмотра."
     bot.send_message(chat_id=message.chat.id, text=text, reply_markup=keyboard())
 
-
-#@bot.message_handler(commands=['team', 'tag'])
-#def topic_creation(message):
-#
-#   bot.reply_to(message, "Команда(тэг) создана. А вот и ссылка для присоединения: " + "start=")
 
 
 
