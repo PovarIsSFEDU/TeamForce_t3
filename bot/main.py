@@ -7,6 +7,9 @@ from keyboa import Keyboa
 import logging
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
 
+from help import extract_unique_code
+from keyboard import start_keyboard_admin, start_keyboard_user, help_callback_keyboard
+
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
 
