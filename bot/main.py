@@ -113,9 +113,16 @@ def creators_callback(call):
 def goback_callback(call):
     parent = call.data.split("=")[1]
     if parent == "start":
-        menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
-                {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-                {'text': "О создателях", 'callback_data': "creators"}]
+        msg_json = call.message.json
+        username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
+        AUTH_ADMIN = check_auth(username)
+        if AUTH_ADMIN:
+            menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
+                    {'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
+                    {'text': "О создателях", 'callback_data': "creators"}]
+        else:
+            menu = [{'text': "Список чатов", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
+                    {'text': "О создателях", 'callback_data': "creators"}]
         for point in menu:
             point["callback_data"] = "&target=" + point["callback_data"] + "$start"
         text = "Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>"
