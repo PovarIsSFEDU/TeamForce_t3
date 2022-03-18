@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     env_file:
       - ./postgres-prodution.env
-      - .env.sample
+      - .env
     build:
       context: ./bot
       dockerfile: Dockerfile
