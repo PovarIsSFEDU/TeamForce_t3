@@ -20,8 +20,8 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 Model = declarative_base(name='Model')
 
 
-class User(Model):
-    __tablename__ = 'user'
+class Users(Model):
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     first_name = Column(String(200))
     last_name = Column(String(200))
@@ -61,8 +61,9 @@ class Topic(Model):
             res.pop("_sa_instance_state")
         return res
 
-employ_theme = Table('user_topic', Model.metadata,
-                     Column('user_id', ForeignKey('user.id')),
+
+employ_theme = Table('users_topic', Model.metadata,
+                     Column('users_id', ForeignKey('users.id')),
                      Column('topic_id', ForeignKey('topic.id'))
                      )
 
@@ -71,7 +72,7 @@ class Message(Model):
     __tablename__ = 'message'
     id = Column(Integer, primary_key=True)
     topic_id = Column(Integer, ForeignKey('topic.id'))
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     status = Column(String(50))
     type = Column(String(50))
     message_text = Column(Text)
