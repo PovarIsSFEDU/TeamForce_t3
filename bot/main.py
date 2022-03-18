@@ -4,9 +4,8 @@ from sqlalchemy import select
 import sys
 import telebot
 from keyboa import Keyboa
-from postgres import db_session, User, Topic, Message, init_migrate
 import logging
-from buiesnes import insert, select_all, db_session, Employ, Theme, Message, init_migrate
+from business import insert, select_all, db_session, User, Topic, Message, init_migrate
 
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
