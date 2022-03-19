@@ -14,6 +14,7 @@ from keyboard import prepare_send_to_topic_keyboard
 from keyboard import test_callback_keyboard, other_callback_keyboard, create_message_keyboard
 
 from StateMachine import StateMachine, State
+from TopicMachine import TopicMachine
 
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
@@ -30,6 +31,7 @@ telebot.logger.setLevel(logging.DEBUG)
 # teams_count: int = sum(1 for _ in teams)
 
 States = StateMachine()
+Topics = TopicMachine()
 
 
 class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
@@ -72,6 +74,8 @@ def start_bot(message):
     name_theme = None
     if id_theme:
         name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
+        Topics.AddUser(message.chat.id)
+        Topics.SetState(message.chat.id, id_theme)
     id_ = select_max_id(Users)
     if get_user_id(telegram_id) is None:
         insert(Users, user_id=id_ + 1, telegram_id=telegram_id, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
@@ -85,6 +89,7 @@ def start_bot(message):
         db_session.commit()
 
     States.AddUser(message.chat.id)
+
     States.SetState(message.chat.id, State.Start)
     start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme)
 
@@ -102,10 +107,9 @@ def create_topic_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_message"))
 def create_message_callback(call):
-    user_id = get_user_id(call.from_user.id)
-    test = get_theme_by_user(user_id)
-    # print(test)
-    # States.SetState(call.message.chat.id, State.CreateMessage)
+    Topics.GetState(call.message.chat.id)
+    test = get_theme_by_user(call.from_user.id)
+    print(test)
     # create_message_keyboard(bot, call, name_theme)
 
 

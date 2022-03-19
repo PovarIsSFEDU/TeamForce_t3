@@ -11,6 +11,7 @@ class State(Enum):
     CreateTopic = 2
     CreateMessage = 3
     CreateAnswer = 4
+    IdTheme = 5
     
 
 '''
@@ -55,4 +56,4 @@ class StateMachine:
         return self.allUsers[str(id)].GetState()              
             
     def ContainsUser(self, id) -> bool:
-        return str(id) in self.allUsers.keys()   
+        return str(id) in self.allUsers.keys()
