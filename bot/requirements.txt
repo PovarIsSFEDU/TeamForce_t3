@@ -1,4 +1,4 @@
-psycopg2
-sqlalchemy
-pyTelegramBotAPI
-keyboa
+psycopg2==2.9.3
+sqlalchemy==1.4.32
+pyTelegramBotAPI==4.4.0
+keyboa==3.1.0
