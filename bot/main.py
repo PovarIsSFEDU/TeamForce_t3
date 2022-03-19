@@ -13,6 +13,8 @@ from keyboard import creators_callback_keyboard, goback_callback_keyboard, exact
 from keyboard import prepare_send_to_topic_keyboard
 from keyboard import test_callback_keyboard, other_callback_keyboard
 
+from StateMachine import StateMachine, State
+
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
 
@@ -24,6 +26,8 @@ telebot.logger.setLevel(logging.DEBUG)
 
 teams = select_all(Topic)
 teams_count: int = sum(1 for _ in teams)
+
+States = StateMachine()
 
 
 class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
@@ -74,6 +78,9 @@ def start_bot(message):
         id_ = id_ if id_ is not None else 0
         insert(Users, user_id=id_ + 1, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
                phone="")
+
+    States.AddUser(message.chat.id)
+    States.SetState(message.chat.id, State.Start)
     start_keyboard(bot, message, AUTH_ADMIN, id_theme)
 
 
@@ -84,7 +91,27 @@ def edit_topic(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_topic"))
 def create_topic_callback(call):
+    States.SetState(call.message.chat.id, State.CreateTopic)
     create_topic_keyboard(bot, call)
+
+
+@bot.message_handler(func=lambda msg: True)
+def other1(call):
+    msg_json = call.json
+    username = msg_json["from"].get("username")
+    AUTH_ADMIN = check_auth(username)
+    try:
+        if States.GetState(call.chat.id) == State.CreateTopic:
+            bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>.",parse_mode='HTML')
+            
+            start_keyboard(bot, call, AUTH_ADMIN, id_theme=None)
+            States.SetState(call.chat.id, State.Start)
+        else:
+            bot.send_message(call.chat.id, "State not correct")
+    except Exception as e:
+        bot.reply_to(chat_id=call.chat.id,
+                     message_id=call.message_id,
+                     text='oooooooppppppssssss')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=topics_list"))
@@ -118,16 +145,6 @@ def other_theme_callback(call):
     bot.register_next_step_handler(call, other1)
 
 
-@bot.message_handler(func=lambda m: True)
-def other1(call):
-    try:
-        if call.text:
-            print(call.text)
-            bot.send_message(chat_id=call.chat.id, text='Спасибо')
-    except Exception as e:
-        bot.reply_to(chat_id=call.message.chat.id,
-                     message_id=call.message.message_id,
-                     text='oooooooppppppssssss')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))
