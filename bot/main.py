@@ -22,7 +22,7 @@ handler = logging.StreamHandler(sys.stdout)
 telebot.logger.addHandler(handler)
 telebot.logger.setLevel(logging.DEBUG)
 
-teams = db_session.execute(select(Topic))
+teams = select_all(Topic)
 teams_count: int = sum(1 for _ in teams)
 
 
@@ -131,9 +131,9 @@ def prepare_send_to_topic(message):
     prepare_send_to_topic_keyboard(bot, message, teams, teams_count)
 
 
-@bot.message_handler(func=lambda m: True)
-def echo_all(message):
-    bot.reply_to(message, message.text)
+# @bot.message_handler(func=lambda m: True)
+# def echo_all(message):
+#     bot.reply_to(message, message.text)
 
 
 bot.add_custom_filter(IsAdmin())

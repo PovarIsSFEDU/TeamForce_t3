@@ -1,5 +1,5 @@
 from sqlalchemy import select, and_, func
-from . import db_session, Users
+from . import db_session, Users, Topic, Message
 import sqlalchemy
 
 
@@ -27,10 +27,9 @@ def convert_to_list(func):
                 if isinstance(res[0], dict):
                     return res
                 if isinstance(res[0], sqlalchemy.engine.row.Row):
-                    if isinstance(res[0][0], Users):
+                    if isinstance(res[0][0], Users) or isinstance(res[0][0], Topic) or isinstance(res[0][0], Message):
                         return [el[0].to_dict() for el in res]
-                    else:
-                        return [el[0] for el in res]
+                    return [el[0] for el in res]
         return res
     return foo
 
