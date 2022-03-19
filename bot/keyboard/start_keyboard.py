@@ -27,7 +27,12 @@ def start_keyboard_user():
     return keyboard()
 
 
-def start_keyboard(bot, message, AUTH_ADMIN):
-    bot.send_message(chat_id=message.chat.id,
-                     text="Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>",
-                     reply_markup=check_rules(AUTH_ADMIN))
+def start_keyboard(bot, message, AUTH_ADMIN, id_theme):
+    if id_theme:
+        bot.send_message(chat_id=message.chat.id,
+                         text=f"Добро пожаловать! Тема обращения ID - {id_theme}",
+                         reply_markup=check_rules(AUTH_ADMIN))
+    else:
+        bot.send_message(chat_id=message.chat.id,
+                         text="Добро пожаловать! Пожалуйста, выберите тему обращения!",
+                         reply_markup=check_rules(AUTH_ADMIN))

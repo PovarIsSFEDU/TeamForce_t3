@@ -53,8 +53,8 @@ def start_bot(message):
     username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
     AUTH_ADMIN = check_auth(username)
     last_name = msg_json["from"].get("last_name")
-    check_id_theme = extract_unique_code(message.text)
-    if check_id_theme:
+    id_theme = extract_unique_code(message.text)
+    if id_theme:
         # check_id_theme - это и будет id темы
         # Тут будет добавление темы для определенного пользователя, который перешёл по ссылке
         pass
@@ -63,7 +63,7 @@ def start_bot(message):
         id_ = id_ if id_ is not None else 0
         insert(Users, user_id=id_ + 1, first_name=first_name, last_name=last_name, username=username, admin=False,
                phone="")
-    start_keyboard(bot, message, AUTH_ADMIN)
+    start_keyboard(bot, message, AUTH_ADMIN, id_theme)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_topic"))
