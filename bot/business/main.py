@@ -1,5 +1,6 @@
 from sqlalchemy import select, and_, func
-from . import db_session
+from . import db_session, Users
+import sqlalchemy
 
 
 def insert(model, **kwargs):
@@ -21,7 +22,16 @@ def delete(model, id_):
 def convert_to_list(func):
     def foo(*args, **kwargs):
         res = func(*args, **kwargs)
-        return [el[0].to_dict() for el in res]
+        if res:
+            if isinstance(res, list):
+                if isinstance(res[0], dict):
+                    return res
+                if isinstance(res[0], sqlalchemy.engine.row.Row):
+                    if isinstance(res[0][0], Users):
+                        return [el[0].to_dict() for el in res]
+                    else:
+                        return [el[0] for el in res]
+        return res
     return foo
 
 

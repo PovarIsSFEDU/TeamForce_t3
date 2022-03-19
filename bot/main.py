@@ -1,11 +1,11 @@
 import logging
 import os
-from sqlalchemy import select
 import sys
 import telebot
+from sqlalchemy import select
 from keyboa import Keyboa
-import logging
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
+from business import convert_to_list
 
 from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
@@ -17,6 +17,7 @@ init_migrate()
 TOKEN = os.environ.get("TOKEN")
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)  # You can set parse_mode by default. HTML or MARKDOWN
+
 handler = logging.StreamHandler(sys.stdout)
 telebot.logger.addHandler(handler)
 telebot.logger.setLevel(logging.DEBUG)
@@ -26,9 +27,25 @@ teams_count: int = sum(1 for _ in teams)
 AUTH_ADMIN: bool = False
 
 
+class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
+    key = 'is_admin'
+
+    @staticmethod
+    def check(message: telebot.types.Message):
+        msg_dict = bot.get_chat_member(message.chat.id, message.from_user.id).__dict__
+        user = msg_dict["user"].__dict__["username"] if msg_dict["user"] else False
+        return user in get_admin_list()
+
+
 def get_user_id(username):
     res = select_all(Users, Users.username == username)
     return res[0].get("id") if res else None
+
+
+@convert_to_list
+def get_admin_list():
+    res = select_all(Users.username, Users.admin)
+    return res
 
 
 def check_auth(username):
@@ -85,6 +102,7 @@ def help_callback(call):
 def creators_callback(call):
     creators_callback_keyboard(bot, call)
 
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=second"))
 def creators_callback(call):
     test_callback_keyboard(bot, call)
@@ -102,8 +120,7 @@ def goback_callback(call):
 
 
 # Расположение клавиатуры для одной команды
-@bot.message_handler(commands=['check_team'])
-@auth
+@bot.message_handler(is_admin=True, commands=['check_team'])
 def exact_topic(message):
     exact_topic_keyboard(bot, message)
 
@@ -122,5 +139,7 @@ def prepare_send_to_topic(message):
 def echo_all(message):
     bot.reply_to(message, message.text)
 
+
+bot.add_custom_filter(IsAdmin())
 
 bot.infinity_polling()
