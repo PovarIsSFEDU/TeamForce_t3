@@ -13,8 +13,8 @@ def create_topic_keyboard(bot, call):
                           #reply_markup=markup)
 
 
-def topics_list_keyboard(bot, call, teams_count, teams):
-    if teams_count == 0:
+def topics_list_keyboard(bot, call, teams):
+    if len(teams) == 0:
         menu = [{'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
         text = "Тэгов/команд пока что нет("
     else:

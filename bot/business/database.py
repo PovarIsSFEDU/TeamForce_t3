@@ -19,6 +19,11 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 
 Model = declarative_base(name='Model')
 
+users_topic = Table('users_topic', Model.metadata,
+                    Column('users_id', ForeignKey('users.id')),
+                    Column('topic_id', ForeignKey('topic.id'))
+                    )
+
 
 class Users(Model):
     __tablename__ = 'users'
@@ -74,12 +79,6 @@ class Topic(Model):
 
     def __str__(self):
         return self.__tablename__
-
-
-employ_theme = Table('users_topic', Model.metadata,
-                     Column('users_id', ForeignKey('users.id')),
-                     Column('topic_id', ForeignKey('topic.id'))
-                     )
 
 
 class Message(Model):

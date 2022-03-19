@@ -5,7 +5,7 @@ import telebot
 from sqlalchemy import select
 from keyboa import Keyboa
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
-from business import convert_to_list, get_theme_by_user
+from business import convert_to_list, get_theme_by_user, users_topic
 
 from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
@@ -26,8 +26,8 @@ handler = logging.StreamHandler(sys.stdout)
 telebot.logger.addHandler(handler)
 telebot.logger.setLevel(logging.DEBUG)
 
-teams = select_all(Topic)
-teams_count: int = sum(1 for _ in teams)
+# teams = select_all(Topic)
+# teams_count: int = sum(1 for _ in teams)
 
 States = StateMachine()
 
@@ -62,6 +62,7 @@ def check_auth(telegram_id):
 
 @bot.message_handler(commands=['start', 'help'])
 def start_bot(message):
+    teams = select_all(Topic)
     msg_json = message.json
     username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
     telegram_id = msg_json["from"].get("id")
@@ -103,13 +104,17 @@ def other1(call):
     msg_json = call.json
     name = msg_json.get("text")
     telegram_id = msg_json["from"].get("id")
-    # user_id = get_user_id(telegram_id)
+    user_id = get_user_id(telegram_id)
     AUTH_ADMIN = check_auth(telegram_id)
     id_ = select_max_id(Topic)
     id_ = id_ if id_ is not None else 0
     try:
         if States.GetState(call.chat.id) == State.CreateTopic:
             insert(Topic, theme_id=id_+1, name=name, url=f"{URL}?start={id_+1}")
+            statement = users_topic.insert().values(users_id=user_id, topic_id=id_+1)
+            db_session.execute(statement)
+            db_session.commit()
+
             bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>.", parse_mode='HTML')
             
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None)
@@ -124,7 +129,8 @@ def other1(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=topics_list"))
 def topics_list_callback(call):
-    topics_list_keyboard(bot, call, teams_count, teams)
+    teams = select_all(Topic)
+    topics_list_keyboard(bot, call, teams)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=help"))
