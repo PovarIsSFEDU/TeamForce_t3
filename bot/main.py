@@ -5,7 +5,7 @@ import telebot
 from sqlalchemy import and_
 from keyboa import Keyboa
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
-from business import convert_to_list, get_theme_by_user, users_topic
+from business import convert_to_list, get_theme_by_user, users_topic, get_message_and_user_by_topic
 
 from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
@@ -180,7 +180,7 @@ def other_theme_callback(call):
     bot.register_next_step_handler(call, other1)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))
+@bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("&goback="))
 def goback_callback(call):
     parent = call.data.split("&")[-1].split("=")[-1]
     tail = call.data.split("&")[1:-1]
@@ -191,15 +191,14 @@ def goback_callback(call):
     goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]), id_theme=None)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("&gotopic="))
+@bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("&gotopic="))
 def gotopic_callback(call):
     parent = call.data.split("&")[-1].split("=")[-1]
-    tail = call.data.split("&")[1:-1]
-    str_tail = ""
-    for x in tail:
-        str_tail += "&" + x
-    call.data = str_tail
-    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]), id_theme=None)
+    data_message = get_message_and_user_by_topic(parent)
+    data_sorted = sorted(data_message, reverse=True, key=lambda mess: mess["message_date"])
+    for mess in data_sorted:
+        msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
+        bot.send_message(chat_id=call.message.chat.id, text=msg)
 
 
 # Расположение клавиатуры для одной команды
