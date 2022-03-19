@@ -64,7 +64,11 @@ def start_bot(message):
     if id_theme:
         # check_id_theme - это и будет id темы
         # Тут будет добавление темы для определенного пользователя, который перешёл по ссылке
-        pass
+        if id_theme in teams:
+            print("Normal enter")
+        else:
+            print("Bad enter without anything")
+    
     if get_user_id(username) is None:
         id_ = select_max_id(Users)
         id_ = id_ if id_ is not None else 0
