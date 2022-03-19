@@ -65,6 +65,12 @@ def get_message_by_topic(id_):
 
 
 @convert_to_list
+def get_message_and_user_by_topic(id_):
+    res = db_session.query(Message, Users).filter(Message.topic_id == id_).all()
+    return res
+
+
+@convert_to_list
 def select_all(model, operator=None):
     stmt = select(model)
     if operator is not None:
