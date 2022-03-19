@@ -25,3 +25,9 @@ def start_keyboard_user():
         point["callback_data"] = "&target=" + point["callback_data"] + "$start"
     keyboard = Keyboa(items=menu)
     return keyboard()
+
+
+def start_keyboard(bot, message, AUTH_ADMIN):
+    bot.send_message(chat_id=message.chat.id,
+                     text="Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>",
+                     reply_markup=check_rules(AUTH_ADMIN))
