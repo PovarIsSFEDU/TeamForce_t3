@@ -32,25 +32,25 @@ class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
     @staticmethod
     def check(message: telebot.types.Message):
         if isinstance(message, telebot.types.CallbackQuery):
-            return message.__dict__["from_user"].__dict__["username"] in get_admin_list()
+            return message.__dict__["from_user"].__dict__["id"] in get_admin_list()
         msg_dict = bot.get_chat_member(message.chat.id, message.from_user.id).__dict__
-        user = msg_dict["user"].__dict__["username"] if msg_dict["user"] else False
+        user = msg_dict["user"].__dict__["id"] if msg_dict["user"] else False
         return user in get_admin_list()
 
 
-def get_user_id(username):
-    res = select_all(Users, Users.username == username)
+def get_user_id(telegram_id):
+    res = select_all(Users, Users.telegram_id == telegram_id)
     return res[0].get("users_id") if res else None
 
 
 @convert_to_list
 def get_admin_list():
-    res = select_all(Users.username, Users.admin)
+    res = select_all(Users.telegram_id, Users.admin)
     return res
 
 
-def check_auth(username):
-    res = select_all(Users, Users.username == username)
+def check_auth(telegram_id):
+    res = select_all(Users, Users.telegram_id == telegram_id)
     return res[0].get("users_admin") if res else False
 
 
@@ -58,7 +58,8 @@ def check_auth(username):
 def start_bot(message):
     msg_json = message.json
     username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
-    AUTH_ADMIN = check_auth(username)
+    telegram_id = msg_json["from"].get("id")
+    AUTH_ADMIN = check_auth(telegram_id)
     last_name = msg_json["from"].get("last_name")
     id_theme = extract_unique_code(message.text)
     if id_theme:
@@ -69,10 +70,10 @@ def start_bot(message):
         else:
             print("Bad enter without anything")
 
-    if get_user_id(username) is None:
+    if get_user_id(telegram_id) is None:
         id_ = select_max_id(Users)
         id_ = id_ if id_ is not None else 0
-        insert(Users, user_id=id_ + 1, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
+        insert(Users, user_id=id_ + 1, telegram_id=telegram_id, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
                phone="")
     start_keyboard(bot, message, AUTH_ADMIN, id_theme)
 
@@ -138,7 +139,7 @@ def goback_callback(call):
     for x in tail:
         str_tail += "&" + x
     call.data = str_tail
-    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["username"]),id_theme=None)
+    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]),id_theme=None)
 
 
 # Расположение клавиатуры для одной команды
@@ -152,7 +153,7 @@ def exact_topic(message):
 # Расположение клавиатуры для одной команды
 @bot.message_handler(commands=['send'])
 def prepare_send_to_topic(message):
-    id_ = get_user_id(message.from_user.username)
+    id_ = get_user_id(message.from_user.id)
     teams = get_theme_by_user(id_)
     teams_count: int = len(teams)
     prepare_send_to_topic_keyboard(bot, message, teams, teams_count)

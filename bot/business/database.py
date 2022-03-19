@@ -23,14 +23,16 @@ Model = declarative_base(name='Model')
 class Users(Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
+    telegram_id = Column(Integer)
     first_name = Column(String(200))
     last_name = Column(String(200))
     username = Column(String(200))
     admin = Column(Boolean)
     phone = Column(String(30))
 
-    def __init__(self, user_id, first_name, last_name, username, admin, phone):
+    def __init__(self, user_id, telegram_id, first_name, last_name, username, admin, phone):
         self.id = user_id
+        self.telegram_id = telegram_id
         self.first_name = first_name
         self.last_name = last_name
         self.username = username
