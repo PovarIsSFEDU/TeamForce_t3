@@ -108,8 +108,7 @@ def create_topic_callback(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_message"))
 def create_message_callback(call):
     Topics.GetState(call.message.chat.id)
-    test = get_theme_by_user(call.from_user.id)
-    print(test)
+    test = get_theme_by_user(get_user_id(call.from_user.id))
     # create_message_keyboard(bot, call, name_theme)
 
 
