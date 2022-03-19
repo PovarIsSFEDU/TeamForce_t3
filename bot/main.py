@@ -98,6 +98,19 @@ def edit_topics_callback(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=other_theme"))
 def other_theme_callback(call):
     other_callback_keyboard(bot, call)
+    bot.register_next_step_handler(call, other1)
+
+
+@bot.message_handler(func=lambda m: True)
+def other1(call):
+    try:
+        if call.text:
+            print(call.text)
+            bot.send_message(chat_id=call.chat.id, text='Спасибо')
+    except Exception as e:
+        bot.reply_to(chat_id=call.message.chat.id,
+                     message_id=call.message.message_id,
+                     text='oooooooppppppssssss')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))
@@ -128,9 +141,9 @@ def prepare_send_to_topic(message):
     prepare_send_to_topic_keyboard(bot, message, teams, teams_count)
 
 
-@bot.message_handler(func=lambda m: True)
-def echo_all(message):
-    bot.reply_to(message, message.text)
+# @bot.message_handler(func=lambda m: True)
+# def echo_all(message):
+#     bot.reply_to(message, message.text)
 
 
 bot.infinity_polling()
