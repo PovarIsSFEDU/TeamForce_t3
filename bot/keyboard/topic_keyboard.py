@@ -18,7 +18,7 @@ def topics_list_keyboard(bot, call, teams):
         menu = [{'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
         text = "Тэгов/команд пока что нет("
     else:
-        menu = [{'text': x.get("topic_name"), 'callback_data': x.get("topic_name")} for x in teams] + [
+        menu = [{'text': x.get("topic_name"), 'callback_data': f'&gotopic={x.get("topic_id")}'} for x in teams] + [
             {'text': "Назад", 'callback_data': "&goback=" + call.data.split("$")[1]}]
         text = "А вот и список команд:"
     keyboard = Keyboa(items=menu)
