@@ -50,7 +50,7 @@ def start_keyboard(bot, message, AUTH_ADMIN, id_theme):
         else:
             bot.send_message(chat_id=message.chat.id,
                              text=f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: {get_name_theme}",
-                             reply_markup=check_rules(AUTH_ADMIN), parse_mode="HTML")
+                             reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
     else:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
