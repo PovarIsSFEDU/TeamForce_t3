@@ -138,7 +138,7 @@ def goback_callback(call):
     for x in tail:
         str_tail += "&" + x
     call.data = str_tail
-    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["username"]))
+    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["username"]),id_theme=None)
 
 
 # Расположение клавиатуры для одной команды

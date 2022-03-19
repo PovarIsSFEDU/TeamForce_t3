@@ -1,4 +1,4 @@
-from .start_keyboard import start_keyboard_admin, start_keyboard_user, check_rules, start_keyboard
+from .start_keyboard import start_keyboard_admin, start_keyboard_user, check_rules, start_keyboard, start_keyboard_user_theme
 from .help_keyboard import help_callback_keyboard
 from .topic_keyboard import create_topic_keyboard, topics_list_keyboard
 from .creators_keyboard import creators_callback_keyboard
