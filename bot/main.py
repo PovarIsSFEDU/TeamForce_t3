@@ -20,6 +20,8 @@ TOKEN = os.environ.get("TOKEN")
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)  # You can set parse_mode by default. HTML or MARKDOWN
 
+URL = f"https://t.me/{bot.get_me().username}"
+
 handler = logging.StreamHandler(sys.stdout)
 telebot.logger.addHandler(handler)
 telebot.logger.setLevel(logging.DEBUG)
@@ -99,11 +101,16 @@ def create_topic_callback(call):
 @bot.message_handler(func=lambda msg: True)
 def other1(call):
     msg_json = call.json
-    username = msg_json["from"].get("username")
-    AUTH_ADMIN = check_auth(username)
+    name = msg_json.get("text")
+    telegram_id = msg_json["from"].get("id")
+    # user_id = get_user_id(telegram_id)
+    AUTH_ADMIN = check_auth(telegram_id)
+    id_ = select_max_id(Topic)
+    id_ = id_ if id_ is not None else 0
     try:
         if States.GetState(call.chat.id) == State.CreateTopic:
-            bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>.",parse_mode='HTML')
+            insert(Topic, theme_id=id_+1, name=name, url=f"{URL}?start={id_+1}")
+            bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>.", parse_mode='HTML')
             
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None)
             States.SetState(call.chat.id, State.Start)
