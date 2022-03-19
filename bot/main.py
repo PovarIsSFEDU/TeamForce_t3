@@ -22,7 +22,7 @@ handler = logging.StreamHandler(sys.stdout)
 telebot.logger.addHandler(handler)
 telebot.logger.setLevel(logging.DEBUG)
 
-teams = db_session.execute(select(Topic))
+teams = select_all(Topic)
 teams_count: int = sum(1 for _ in teams)
 
 
