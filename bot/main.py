@@ -24,7 +24,6 @@ telebot.logger.setLevel(logging.DEBUG)
 
 teams = db_session.execute(select(Topic))
 teams_count: int = sum(1 for _ in teams)
-AUTH_ADMIN: bool = False
 
 
 class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
@@ -32,6 +31,8 @@ class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
 
     @staticmethod
     def check(message: telebot.types.Message):
+        if isinstance(message, telebot.types.CallbackQuery):
+            return message.__dict__["from_user"].__dict__["username"] in get_admin_list()
         msg_dict = bot.get_chat_member(message.chat.id, message.from_user.id).__dict__
         user = msg_dict["user"].__dict__["username"] if msg_dict["user"] else False
         return user in get_admin_list()
@@ -53,17 +54,6 @@ def check_auth(username):
     return res[0].get("admin") if res else False
 
 
-def auth(func):
-    if AUTH_ADMIN:
-        def foo(*args, **kwargs):
-            func(*args, **kwargs)
-
-        return foo()
-    else:
-        _ = lambda *args: None
-        return _
-
-
 @bot.message_handler(commands=['start', 'help'])
 def start_bot(message):
     msg_json = message.json
@@ -78,9 +68,14 @@ def start_bot(message):
     if get_user_id(username) is None:
         id_ = select_max_id(Users)
         id_ = id_ if id_ is not None else 0
-        insert(Users, user_id=id_ + 1, first_name=first_name, last_name=last_name, username=username, admin=False,
+        insert(Users, user_id=id_ + 1, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
                phone="")
     start_keyboard(bot, message, AUTH_ADMIN, id_theme)
+
+
+@bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("push_topic"))
+def edit_topic(call):
+    pass
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_topic"))
@@ -116,7 +111,7 @@ def goback_callback(call):
     for x in tail:
         str_tail += "&" + x
     call.data = str_tail
-    goback_callback_keyboard(bot, call, parent, AUTH_ADMIN)
+    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["username"]))
 
 
 # Расположение клавиатуры для одной команды
@@ -130,7 +125,8 @@ def exact_topic(message):
 # Расположение клавиатуры для одной команды
 @bot.message_handler(commands=['send'])
 def prepare_send_to_topic(message):
-    teams = db_session.execute(select(Topic).join(Users).filter(Users.id == message.from_user.id))  # TODO Join-query
+    id_ = get_user_id(message.from_user.username)
+    teams = db_session.query(Users, Topic).filter(Users.id == id_).all()
     teams_count: int = sum(1 for _ in teams)
     prepare_send_to_topic_keyboard(bot, message, teams, teams_count)
 
