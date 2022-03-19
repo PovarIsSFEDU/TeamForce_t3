@@ -5,7 +5,7 @@ import telebot
 from sqlalchemy import select
 from keyboa import Keyboa
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
-from business import convert_to_list
+from business import convert_to_list, get_theme_by_user
 
 from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
@@ -40,7 +40,7 @@ class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
 
 def get_user_id(username):
     res = select_all(Users, Users.username == username)
-    return res[0].get("id") if res else None
+    return res[0].get("users_id") if res else None
 
 
 @convert_to_list
@@ -51,7 +51,7 @@ def get_admin_list():
 
 def check_auth(username):
     res = select_all(Users, Users.username == username)
-    return res[0].get("admin") if res else False
+    return res[0].get("users_admin") if res else False
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -68,7 +68,7 @@ def start_bot(message):
             print("Normal enter")
         else:
             print("Bad enter without anything")
-    
+
     if get_user_id(username) is None:
         id_ = select_max_id(Users)
         id_ = id_ if id_ is not None else 0
@@ -153,8 +153,8 @@ def exact_topic(message):
 @bot.message_handler(commands=['send'])
 def prepare_send_to_topic(message):
     id_ = get_user_id(message.from_user.username)
-    teams = db_session.query(Users, Topic).filter(Users.id == id_).all()
-    teams_count: int = sum(1 for _ in teams)
+    teams = get_theme_by_user(id_)
+    teams_count: int = len(teams)
     prepare_send_to_topic_keyboard(bot, message, teams, teams_count)
 
 

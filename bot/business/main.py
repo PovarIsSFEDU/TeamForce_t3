@@ -19,17 +19,29 @@ def delete(model, id_):
     db_session.commit()
 
 
+def checked(el):
+    return isinstance(el, Users) or isinstance(el, Topic) or isinstance(el, Message)
+
+
 def convert_to_list(func):
     def foo(*args, **kwargs):
         res = func(*args, **kwargs)
+        result = []
         if res:
             if isinstance(res, list):
                 if isinstance(res[0], dict):
                     return res
                 if isinstance(res[0], sqlalchemy.engine.row.Row):
-                    if isinstance(res[0][0], Users) or isinstance(res[0][0], Topic) or isinstance(res[0][0], Message):
-                        return [el[0].to_dict() for el in res]
-                    return [el[0] for el in res]
+                    for shingle in res:
+                        dict_prom = {}
+                        for el in shingle:
+                            if isinstance(el, str) or isinstance(el, int):
+                                result.append(el)
+                            else:
+                                dict_prom.update(el.to_dict())
+                        if dict_prom:
+                            result.append(dict_prom)
+                    return result
         return res
     return foo
 
@@ -38,6 +50,12 @@ def select_max_id(model):
     stmt = select(func.max(model.id))
     res = db_session.execute(stmt).first()
     return res[0]
+
+
+@convert_to_list
+def get_theme_by_user(id_):
+    res = db_session.query(Users, Topic).filter(Users.id == id_).all()
+    return res
 
 
 @convert_to_list
