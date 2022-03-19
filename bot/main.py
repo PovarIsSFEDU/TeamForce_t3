@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import telebot
-from sqlalchemy import select
+from sqlalchemy import and_
 from keyboa import Keyboa
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
 from business import convert_to_list, get_theme_by_user, users_topic
@@ -72,19 +72,23 @@ def start_bot(message):
     name_theme = None
     if id_theme:
         name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
-
+    id_ = select_max_id(Users)
     if get_user_id(telegram_id) is None:
-        id_ = select_max_id(Users)
-        id_ = id_ if id_ is not None else 0
         insert(Users, user_id=id_ + 1, telegram_id=telegram_id, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
                phone="")
+    statement1 = users_topic.select().where(and_(users_topic.columns.topic_id == id_theme, users_topic.columns.users_id == get_user_id(telegram_id)))
+    check_user_topic = db_session.execute(statement1).fetchall()
+    if get_user_id(telegram_id) is not None and id_theme is not None and select_all(Topic.id, operator=Topic.id == id_theme) and not check_user_topic:
+        statement = users_topic.insert().values(users_id=id_ + 1, topic_id=id_theme)
+        db_session.execute(statement)
+        db_session.commit()
 
     States.AddUser(message.chat.id)
     States.SetState(message.chat.id, State.Start)
     start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme)
 
 
-@bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("push_topic"))
+@bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("test"))
 def edit_topic(call):
     pass
 
@@ -94,11 +98,11 @@ def create_topic_callback(call):
     States.SetState(call.message.chat.id, State.CreateTopic)
     create_topic_keyboard(bot, call)
 
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_message"))
 def create_message_callback(call):
     States.SetState(call.message.chat.id, State.CreateMessage)
     create_message_keyboard(bot, call, name_theme)
-
 
 
 @bot.message_handler(func=lambda msg: True)
@@ -118,7 +122,7 @@ def other1(call):
             db_session.commit()
 
             bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>.", parse_mode='HTML')
-            
+
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None)
             States.SetState(call.chat.id, State.Start)
         else:
@@ -169,7 +173,18 @@ def goback_callback(call):
     for x in tail:
         str_tail += "&" + x
     call.data = str_tail
-    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]),id_theme=None)
+    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]), id_theme=None)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&gotopic="))
+def gotopic_callback(call):
+    parent = call.data.split("&")[-1].split("=")[-1]
+    tail = call.data.split("&")[1:-1]
+    str_tail = ""
+    for x in tail:
+        str_tail += "&" + x
+    call.data = str_tail
+    goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]), id_theme=None)
 
 
 # Расположение клавиатуры для одной команды
