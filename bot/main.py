@@ -11,6 +11,7 @@ from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
 from keyboard import creators_callback_keyboard, goback_callback_keyboard, exact_topic_keyboard
 from keyboard import prepare_send_to_topic_keyboard
+from keyboard import test_callback_keyboard
 
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
@@ -18,7 +19,7 @@ TOKEN = os.environ.get("TOKEN")
 bot = telebot.TeleBot(TOKEN, parse_mode=None)  # You can set parse_mode by default. HTML or MARKDOWN
 handler = logging.StreamHandler(sys.stdout)
 telebot.logger.addHandler(handler)
-telebot.logger.setLevel(logging.INFO)
+telebot.logger.setLevel(logging.DEBUG)
 
 teams = db_session.execute(select(Topic))
 teams_count: int = sum(1 for _ in teams)
@@ -84,10 +85,19 @@ def help_callback(call):
 def creators_callback(call):
     creators_callback_keyboard(bot, call)
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=second"))
+def creators_callback(call):
+    test_callback_keyboard(bot, call)
+
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))
 def goback_callback(call):
-    parent = call.data.split("=")[1]
+    parent = call.data.split("&")[-1].split("=")[-1]
+    tail = call.data.split("&")[1:-1]
+    str_tail = ""
+    for x in tail:
+        str_tail += "&" + x
+    call.data = str_tail
     goback_callback_keyboard(bot, call, parent, AUTH_ADMIN)
 
 

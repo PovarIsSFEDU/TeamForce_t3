@@ -5,3 +5,4 @@ from .creators_keyboard import creators_callback_keyboard
 from .goback_keyboard import goback_callback_keyboard
 from .exact_topic_keyboard import exact_topic_keyboard
 from .prepare_send_to_topic_keyboard import prepare_send_to_topic_keyboard
+from .test_keyboard import test_callback_keyboard
