@@ -11,7 +11,7 @@ from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
 from keyboard import creators_callback_keyboard, goback_callback_keyboard, exact_topic_keyboard
 from keyboard import prepare_send_to_topic_keyboard
-from keyboard import test_callback_keyboard
+from keyboard import test_callback_keyboard, other_callback_keyboard
 
 init_migrate()
 TOKEN = os.environ.get("TOKEN")
@@ -101,6 +101,29 @@ def creators_callback(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=second"))
 def creators_callback(call):
     test_callback_keyboard(bot, call)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("push_topic"))
+def edit_topics_callback(call):
+    test_callback_keyboard(bot, call)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=other_theme"))
+def other_theme_callback(call):
+    other_callback_keyboard(bot, call)
+    bot.register_next_step_handler(call, other1)
+
+
+@bot.message_handler(func=lambda m: True)
+def other1(call):
+    try:
+        if call.text:
+            print(call.text)
+            bot.send_message(chat_id=call.chat.id, text='Спасибо')
+    except Exception as e:
+        bot.reply_to(chat_id=call.message.chat.id,
+                     message_id=call.message.message_id,
+                     text='oooooooppppppssssss')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))

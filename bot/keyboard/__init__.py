@@ -6,3 +6,4 @@ from .goback_keyboard import goback_callback_keyboard
 from .exact_topic_keyboard import exact_topic_keyboard
 from .prepare_send_to_topic_keyboard import prepare_send_to_topic_keyboard
 from .test_keyboard import test_callback_keyboard
+from .other_theme.other_theme_keyboard import other_callback_keyboard
