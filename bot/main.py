@@ -78,6 +78,7 @@ def start_bot(message):
                phone="")
     statement1 = users_topic.select().where(and_(users_topic.columns.topic_id == id_theme, users_topic.columns.users_id == get_user_id(telegram_id)))
     check_user_topic = db_session.execute(statement1).fetchall()
+
     if get_user_id(telegram_id) is not None and id_theme is not None and select_all(Topic.id, operator=Topic.id == id_theme) and not check_user_topic:
         statement = users_topic.insert().values(users_id=id_ + 1, topic_id=id_theme)
         db_session.execute(statement)
@@ -101,8 +102,11 @@ def create_topic_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_message"))
 def create_message_callback(call):
-    States.SetState(call.message.chat.id, State.CreateMessage)
-    create_message_keyboard(bot, call, name_theme)
+    user_id = get_user_id(call.from_user.id)
+    test = get_theme_by_user(user_id)
+    # print(test)
+    # States.SetState(call.message.chat.id, State.CreateMessage)
+    # create_message_keyboard(bot, call, name_theme)
 
 
 @bot.message_handler(func=lambda msg: True)
