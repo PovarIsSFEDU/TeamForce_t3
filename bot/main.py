@@ -137,7 +137,7 @@ def other1(call):
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)
             States.SetState(call.chat.id, State.Start)
         elif States.GetState(call.chat.id) == State.CreateMessage:
-            #TODO - сохранение сообщений в базу с учетом темы, message_id и message_text
+            #TODO - сохранение сообщений в базу с учетом темы, message_id и message_text, chat_id, user_id
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=Topics.GetState(call.chat.id), name_theme=None)
             States.SetState(call.chat.id, State.Start)
         else:
