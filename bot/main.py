@@ -76,7 +76,9 @@ def start_bot(message):
         name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
         Topics.AddUser(message.chat.id)
         Topics.SetState(message.chat.id, id_theme)
-    id_ = select_max_id(Users)
+    id_ = select_max_id(Users) 
+    if id_ is None:
+        id_ = 0
     if get_user_id(telegram_id) is None:
         insert(Users, user_id=id_ + 1, telegram_id=telegram_id, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
                phone="")
@@ -109,6 +111,8 @@ def create_topic_callback(call):
 def create_message_callback(call):
     Topics.GetState(call.message.chat.id)
     test = get_theme_by_user(get_user_id(call.from_user.id))
+    States.SetState(call.message.chat.id, State.CreateMessage)
+    bot.send_message(chat_id=call.message.chat.id, text="Напишите ваше сообщение:")
     # create_message_keyboard(bot, call, name_theme)
 
 
@@ -130,7 +134,11 @@ def other1(call):
 
             bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>.", parse_mode='HTML')
 
-            start_keyboard(bot, call, AUTH_ADMIN, id_theme=None)
+            start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)
+            States.SetState(call.chat.id, State.Start)
+        elif States.GetState(call.chat.id) == State.CreateMessage:
+            #TODO - сохранение сообщений в базу с учетом темы, message_id и message_text
+            start_keyboard(bot, call, AUTH_ADMIN, id_theme=Topics.GetState(call.chat.id), name_theme=None)
             States.SetState(call.chat.id, State.Start)
         else:
             bot.send_message(call.chat.id, "State not correct")
