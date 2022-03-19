@@ -11,7 +11,7 @@ from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
 from keyboard import creators_callback_keyboard, goback_callback_keyboard, exact_topic_keyboard
 from keyboard import prepare_send_to_topic_keyboard
-from keyboard import test_callback_keyboard, other_callback_keyboard
+from keyboard import test_callback_keyboard, other_callback_keyboard, create_message_keyboard
 
 from StateMachine import StateMachine, State
 
@@ -69,13 +69,9 @@ def start_bot(message):
     AUTH_ADMIN = check_auth(telegram_id)
     last_name = msg_json["from"].get("last_name")
     id_theme = extract_unique_code(message.text)
+    name_theme = None
     if id_theme:
-        # check_id_theme - это и будет id темы
-        # Тут будет добавление темы для определенного пользователя, который перешёл по ссылке
-        if id_theme in teams:
-            print("Normal enter")
-        else:
-            print("Bad enter without anything")
+        name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
 
     if get_user_id(telegram_id) is None:
         id_ = select_max_id(Users)
@@ -85,7 +81,7 @@ def start_bot(message):
 
     States.AddUser(message.chat.id)
     States.SetState(message.chat.id, State.Start)
-    start_keyboard(bot, message, AUTH_ADMIN, id_theme)
+    start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme)
 
 
 @bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("push_topic"))
@@ -97,6 +93,12 @@ def edit_topic(call):
 def create_topic_callback(call):
     States.SetState(call.message.chat.id, State.CreateTopic)
     create_topic_keyboard(bot, call)
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&target=create_message"))
+def create_message_callback(call):
+    States.SetState(call.message.chat.id, State.CreateMessage)
+    create_message_keyboard(bot, call, name_theme)
+
 
 
 @bot.message_handler(func=lambda msg: True)
@@ -157,8 +159,6 @@ def edit_topics_callback(call):
 def other_theme_callback(call):
     other_callback_keyboard(bot, call)
     bot.register_next_step_handler(call, other1)
-
-
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))

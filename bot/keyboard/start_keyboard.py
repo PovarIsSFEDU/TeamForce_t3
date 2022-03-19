@@ -37,11 +37,12 @@ def start_keyboard_user():
     return keyboard()
 
 
-def start_keyboard(bot, message, AUTH_ADMIN, id_theme):
+def start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme):
     msg_json = message.json
     user_name = msg_json["from"].get("username")
     # get_name_theme = получение наименования темы по id из базы
     get_name_theme = "<b>Проект вселенского масштаба, в который нужны бэкендеры</b>"
+
     if id_theme:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
@@ -49,8 +50,8 @@ def start_keyboard(bot, message, AUTH_ADMIN, id_theme):
                              reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
         else:
             bot.send_message(chat_id=message.chat.id,
-                             text=f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: {get_name_theme}",
-                             reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
+                             text=f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: <b>{name_theme}</b>",
+                             reply_markup=check_rules(AUTH_ADMIN, id_theme), parse_mode="HTML")
     else:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
