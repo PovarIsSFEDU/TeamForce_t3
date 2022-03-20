@@ -4,6 +4,7 @@ import sys
 import telebot
 from sqlalchemy import and_
 from keyboa import Keyboa
+from datetime import date
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
 from business import convert_to_list, get_theme_by_user, users_topic, get_message_and_user_by_topic
 
@@ -137,8 +138,13 @@ def other1(call):
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)
             States.SetState(call.chat.id, State.Start)
         elif States.GetState(call.chat.id) == State.CreateMessage:
-            #TODO - сохранение сообщений в базу с учетом темы, message_id и message_text, chat_id, user_id
-            start_keyboard(bot, call, AUTH_ADMIN, id_theme=Topics.GetState(call.chat.id), name_theme=None)
+            id_msg = select_max_id(Message)
+            id_msg = id_msg if id_msg is not None else 0
+            id_theme = Topics.GetState(call.chat.id)
+            # TODO - сохранение статуса сообщения
+            insert(Message, id_=id_msg+1, date=date.today(), topic_id=Topics.GetState(call.chat.id), user_id=user_id, status="",
+                   type="admin" if AUTH_ADMIN else "user", message_text=call.text, chat_id=call.chat.id)
+            start_keyboard(bot, call, AUTH_ADMIN, id_theme=id_theme, name_theme=select_all(Topic.name, operator=Topic.id == id_theme)[0])
             States.SetState(call.chat.id, State.Start)
         else:
             bot.send_message(call.chat.id, "State not correct")
@@ -180,7 +186,7 @@ def other_theme_callback(call):
     bot.register_next_step_handler(call, other1)
 
 
-@bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("&goback="))
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&goback="))
 def goback_callback(call):
     parent = call.data.split("&")[-1].split("=")[-1]
     tail = call.data.split("&")[1:-1]

@@ -90,12 +90,17 @@ class Message(Model):
     type = Column(String(50))
     message_text = Column(Text)
     date = Column(Date)
+    chat_id = Column(Integer)
 
-    def __init__(self, employ_id, name, project_name, date_message):
-        self.id = employ_id
-        self.name = name
-        self.project_name = project_name
-        self.date_message = date_message
+    def __init__(self, id_, topic_id, user_id, status, type, message_text, date, chat_id):
+        self.id = id_
+        self.date = date
+        self.topic_id = topic_id
+        self.user_id = user_id
+        self.status = status
+        self.type = type
+        self.message_text = message_text
+        self.chat_id = chat_id
 
     def to_dict(self):
         res_prom = self.__dict__
