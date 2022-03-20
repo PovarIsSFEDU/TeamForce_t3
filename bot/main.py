@@ -140,9 +140,6 @@ def create_message_callback(call):
     # create_message_keyboard(bot, call, name_theme)
 
 
-
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith("&target=topics_list"))
 def topics_list_callback(call):
     teams = select_all(Topic)
@@ -227,11 +224,12 @@ def gotopic_callback(call):
             keyboard = Keyboa(items=menu)
             bot.send_message(chat_id=call.message.chat.id, text=msg, reply_markup=keyboard())
 
+
 @bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("&answer="))
 def answer_to_user(call):
     States.SetState(call.message.chat.id, State.CreateAnswer)
     Topics.SetState(call.message.chat.id, int(call.data.split("=")[1]))
-    #TODO - Удаление предыдущих сообщений
+    # TODO - Удаление предыдущих сообщений
     bot.send_message(chat_id=call.message.chat.id, text="Напишите ваш ответ:", parse_mode='HTML')
 
 
@@ -251,15 +249,17 @@ def other1(call):
             db_session.execute(statement)
             db_session.commit()
 
-            bot.send_message(call.chat.id, f"Вы создали тему <b>{call.text}</b>. \n Вот ссылка на тему: {URL}?start={id_ + 1}", parse_mode='HTML')
+            bot.send_message(call.chat.id,
+                             f"Вы создали тему <b>{call.text}</b>. \nВот ссылка на тему: {URL}?start={id_ + 1}",
+                             parse_mode='HTML')
 
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)
             States.SetState(call.chat.id, State.Start)
         elif States.GetState(call.chat.id) == State.CreateAnswer:
             message_id = Topics.GetState(call.chat.id)
-            #TODO - непосредственный ответ реплаем на сообщение юзера!!!!
-            message_from_db = select_all(Message.message_text, Message.chat_id==message_id)[0]
-            #bot.reply_to(message_from_db["message_id"], "Howdy, how are you doing?")
+            # TODO - непосредственный ответ реплаем на сообщение юзера!!!!
+            message_from_db = select_all(Message, Message.chat_id == message_id)[0]
+            bot.reply_to(message_from_db["message_message_telegram_id"], "Howdy, how are you doing?")
             bot.send_message(chat_id=message_id, text=call.text)
             States.SetState(call.chat.id, State.Start)
             Topics.SetState(call.chat.id, 0)
@@ -270,8 +270,9 @@ def other1(call):
             id_theme = Topics.GetState(call.chat.id)
             if id_theme is None:
                 id_theme = get_current_topic(telegram_id)
-            # TODO - сохранение статуса сообщения
-            insert(Message, id_=id_msg + 1, date=date.today(), topic_id=id_theme, user_id=user_id, status="",
+
+            insert(Message, id_=id_msg + 1, message_telegram_id=call.message_id, date=date.today(), topic_id=id_theme,
+                   user_id=user_id, status="",
                    type="admin" if AUTH_ADMIN else "user", message_text=call.text, chat_id=call.chat.id)
             # start_keyboard(bot, call, AUTH_ADMIN, id_theme=id_theme,
             #                name_theme=select_all(Topic.name, operator=Topic.id == id_theme)[0])
@@ -280,8 +281,9 @@ def other1(call):
         #     bot.send_message(call.chat.id, "State not correct")
     except Exception as e:
         bot.send_message(chat_id=call.chat.id,
-                     message_id=call.message_id,
-                     text='oooooooppppppssssss')
+                         message_id=call.message_id,
+                         text='oooooooppppppssssss')
+
 
 # Расположение клавиатуры для одной команды
 @bot.message_handler(is_admin=True, commands=['check_team'])

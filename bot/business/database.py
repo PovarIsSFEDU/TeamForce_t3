@@ -84,6 +84,7 @@ class Topic(Model):
 class Message(Model):
     __tablename__ = 'message'
     id = Column(BigInteger, primary_key=True)
+    message_telegram_id = Column(BigInteger)
     topic_id = Column(BigInteger, ForeignKey('topic.id'))
     user_id = Column(BigInteger, ForeignKey('users.id'))
     status = Column(String(50))
@@ -92,7 +93,7 @@ class Message(Model):
     date = Column(Date)
     chat_id = Column(BigInteger)
 
-    def __init__(self, id_, topic_id, user_id, status, type, message_text, date, chat_id):
+    def __init__(self, id_, message_telegram_id, topic_id, user_id, status, type, message_text, date, chat_id):
         self.id = id_
         self.date = date
         self.topic_id = topic_id
@@ -101,6 +102,7 @@ class Message(Model):
         self.type = type
         self.message_text = message_text
         self.chat_id = chat_id
+        self.message_telegram_id = message_telegram_id
 
     def to_dict(self):
         res_prom = self.__dict__
