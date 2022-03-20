@@ -59,5 +59,4 @@ def start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme):
                              reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
         else:
             bot.send_message(chat_id=message.chat.id,
-                             text="Добро пожаловать! У вас нет доступа к темам!",
-                             reply_markup=check_rules(AUTH_ADMIN, id_theme=None))
+                             text="Добро пожаловать! У вас нет доступа к теме!")
