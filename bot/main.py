@@ -208,7 +208,7 @@ def gotopic_callback(call):
             bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
             for mess in data_sorted:
                 msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
-                menu = [{'text': "Написать ответ", 'callback_data': f'&answer={mess["message_chat_id"]}'}]
+                menu = [{'text': "Написать ответ ✏", 'callback_data': f'&answer={mess["message_chat_id"]}'}]
                 keyboard = Keyboa(items=menu)
                 bot.send_message(chat_id=call.message.chat.id, text=msg, reply_markup=keyboard())
     else:
@@ -220,7 +220,7 @@ def gotopic_callback(call):
         bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
         for mess in data_sorted:
             msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
-            menu = [{'text': "Написать ответ", 'callback_data': f'&answer={mess["message_message_telegram_id"]}'}]
+            menu = [{'text': "Написать ответ ✏", 'callback_data': f'&answer={mess["message_message_telegram_id"]}'}]
             keyboard = Keyboa(items=menu)
             bot.send_message(chat_id=call.message.chat.id, text=msg, reply_markup=keyboard())
 
@@ -230,7 +230,7 @@ def answer_to_user(call):
     States.SetState(call.message.chat.id, State.CreateAnswer)
     Topics.SetState(call.message.chat.id, int(call.data.split("=")[1]))
     # TODO - Удаление предыдущих сообщений
-    bot.send_message(chat_id=call.message.chat.id, text="Напишите ваш ответ:", parse_mode='HTML')
+    bot.send_message(chat_id=call.message.chat.id, text="Напишите ваш ответ: ✏", parse_mode='HTML')
 
 
 @bot.message_handler(func=lambda msg: True)
@@ -250,7 +250,7 @@ def other1(call):
             db_session.commit()
 
             bot.send_message(call.chat.id,
-                             f"Вы создали тему <b>{call.text}</b>. \nВот ссылка на тему: {URL}?start={id_ + 1}",
+                             f"✅ Вы создали тему <b>{call.text}</b>. \nВот ссылка на тему: {URL}?start={id_ + 1}",
                              parse_mode='HTML')
 
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)

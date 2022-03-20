@@ -11,9 +11,9 @@ def check_rules(auth, id_theme):
 
 
 def start_keyboard_admin():
-    menu = [{'text': "Создать тэг/команду", 'callback_data': "create_topic"},
-            {'text': "Список тем", 'callback_data': "topics_list"}, {'text': "Помощь", 'callback_data': "help"},
-            {'text': "О создателях", 'callback_data': "creators"}]
+    menu = [{'text': "Создать тему ✏", 'callback_data': "create_topic"},
+            {'text': "Список тем 📚", 'callback_data': "topics_list"}, {'text': "Помощь 📪", 'callback_data': "help"},
+            {'text': "О создателях 🔮", 'callback_data': "creators"}]
     for point in menu:
         point["callback_data"] = "&target=" + point["callback_data"] + "$start"
     keyboard = Keyboa(items=menu)
@@ -21,7 +21,7 @@ def start_keyboard_admin():
 
 
 def start_keyboard_user_theme():
-    menu = [{'text': "Список моих тем", 'callback_data': "&my_list=all"}]
+    menu = [{'text': "Список доступных Вам тем 📚", 'callback_data': "&my_list=all"}]
     keyboard = Keyboa(items=menu)
     return keyboard()
 
@@ -44,19 +44,19 @@ def start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme):
     if id_theme:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
-                             text="Добро пожаловать! Пожалуйста, выберите команду!",
+                             text="Добро пожаловать! Пожалуйста, выберите команду! ⚙",
                              reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
         else:
             msg1 = "Пожалуйста пишите в чат."
-            msg = f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: <b>{name_theme}</b>. {msg1}"
+            msg = f"Добро пожаловать {user_name}!🎉 \nВы собираетесь ответить в тему: <b>{name_theme}</b>. \n{msg1}"
             bot.send_message(chat_id=message.chat.id,
                              text=msg, reply_markup=check_rules(AUTH_ADMIN, id_theme=id_theme),
                              parse_mode="HTML")
     else:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
-                             text="Добро пожаловать! Пожалуйста, выберите команду!",
+                             text="Добро пожаловать! Пожалуйста, выберите команду! ⚙",
                              reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
         else:
             bot.send_message(chat_id=message.chat.id,
-                             text="Добро пожаловать! У вас нет доступа к теме!")
+                             text="Добро пожаловать! У вас нет доступа к теме! ❌")
