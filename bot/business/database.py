@@ -2,7 +2,7 @@
 
 
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Text, Date, Table, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, BigInteger, String, Text, Date, Table, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -27,8 +27,8 @@ users_topic = Table('users_topic', Model.metadata,
 
 class Users(Model):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    telegram_id = Column(Integer)
+    id = Column(BigInteger, primary_key=True)
+    telegram_id = Column(BigInteger)
     first_name = Column(String(200))
     last_name = Column(String(200))
     username = Column(String(200))
@@ -59,7 +59,7 @@ class Users(Model):
 
 class Topic(Model):
     __tablename__ = 'topic'
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     name = Column(String(500))
     url = Column(String(500))
 
@@ -83,14 +83,14 @@ class Topic(Model):
 
 class Message(Model):
     __tablename__ = 'message'
-    id = Column(Integer, primary_key=True)
-    topic_id = Column(Integer, ForeignKey('topic.id'))
-    user_id = Column(Integer, ForeignKey('users.id'))
+    id = Column(BigInteger, primary_key=True)
+    topic_id = Column(BigInteger, ForeignKey('topic.id'))
+    user_id = Column(BigInteger, ForeignKey('users.id'))
     status = Column(String(50))
     type = Column(String(50))
     message_text = Column(Text)
     date = Column(Date)
-    chat_id = Column(Integer)
+    chat_id = Column(BigInteger)
 
     def __init__(self, id_, topic_id, user_id, status, type, message_text, date, chat_id):
         self.id = id_
@@ -117,9 +117,9 @@ class Message(Model):
 
 class StateTopic(Model):
     __tablename__ = 'state_topic'
-    id = Column(Integer, primary_key=True)
-    topic_id = Column(Integer)
-    telegram_id = Column(Integer)
+    id = Column(BigInteger, primary_key=True)
+    topic_id = Column(BigInteger)
+    telegram_id = Column(BigInteger)
 
     def __init__(self, id_, telegram_id, topic_id):
         self.id = id_

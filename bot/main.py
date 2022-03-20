@@ -79,21 +79,24 @@ def start_bot(message):
     last_name = msg_json["from"].get("last_name")
     id_theme = extract_unique_code(message.text)
     name_theme = None
-    if id_theme:
-        if check_insert_or_update(StateTopic, telegram_id):
-            update(StateTopic, telegram_id, topic_id=id_theme)
-        else:
-            id_ = select_max_id(StateTopic)
-            if id_ is None:
-                id_ = 0
-            insert(StateTopic, topic_id=id_theme, telegram_id=telegram_id, id_=id_ + 1)
-        name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
-        Topics.AddUser(message.chat.id)
-        Topics.SetState(message.chat.id, id_theme)
-    elif select_max_id(Topic) is not None and select_all(Topic.id, Topic.id == id_theme):
-        id_theme = get_current_topic(telegram_id)
+    if select_all(Topic.id, Topic.id == id_theme):
         if id_theme:
+            if check_insert_or_update(StateTopic, telegram_id):
+                update(StateTopic, telegram_id, topic_id=id_theme)
+            else:
+                id_ = select_max_id(StateTopic)
+                if id_ is None:
+                    id_ = 0
+                insert(StateTopic, topic_id=id_theme, telegram_id=telegram_id, id_=id_ + 1)
             name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
+            Topics.AddUser(message.chat.id)
+            Topics.SetState(message.chat.id, id_theme)
+        elif select_max_id(Topic) is not None:
+            id_theme = get_current_topic(telegram_id)
+            if id_theme:
+                name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
+    else:
+        id_theme = None
     id_ = select_max_id(Users)
     if id_ is None:
         id_ = 0
