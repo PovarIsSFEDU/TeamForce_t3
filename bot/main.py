@@ -200,11 +200,28 @@ def goback_callback(call):
 @bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("&gotopic="))
 def gotopic_callback(call):
     parent = call.data.split("&")[-1].split("=")[-1]
-    data_message = get_message_and_user_by_topic(parent)
-    data_sorted = sorted(data_message, reverse=True, key=lambda mess: mess["message_date"])
-    for mess in data_sorted:
-        msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
-        bot.send_message(chat_id=call.message.chat.id, text=msg)
+    if parent == "all":
+        topic_ids = select_all(Topic.id)
+        for parent in topic_ids:
+            data_message = get_message_and_user_by_topic(parent)
+            prom_url = select_all(Topic.url, operator=Topic.id == parent)[0]
+            topic = select_all(Topic.name, operator=Topic.id == parent)[0]
+            data_sorted = sorted(data_message, reverse=True, key=lambda mess: mess["message_date"])
+            msg = f'<b>{topic}</b>: {prom_url}'
+            bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
+            for mess in data_sorted:
+                msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
+                bot.send_message(chat_id=call.message.chat.id, text=msg)
+    else:
+        data_message = get_message_and_user_by_topic(parent)
+        prom_url = select_all(Topic.url, operator=Topic.id == parent)[0]
+        topic = select_all(Topic.name, operator=Topic.id == parent)[0]
+        data_sorted = sorted(data_message, reverse=True, key=lambda mess: mess["message_date"])
+        msg = f'<b>{topic}</b>: {prom_url}'
+        bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
+        for mess in data_sorted:
+            msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
+            bot.send_message(chat_id=call.message.chat.id, text=msg)
 
 
 # Расположение клавиатуры для одной команды
