@@ -60,7 +60,8 @@ def get_admin_list():
 
 
 def get_current_topic(telegram_id):
-    id_theme = select_all(StateTopic.topic_id, operator=StateTopic.telegram_id == telegram_id)[0]
+    id_theme = select_all(StateTopic.topic_id, operator=StateTopic.telegram_id == telegram_id)
+    id_theme = id_theme[0] if id_theme else None
     return id_theme
 
 
@@ -77,6 +78,7 @@ def start_bot(message):
     AUTH_ADMIN = check_auth(telegram_id)
     last_name = msg_json["from"].get("last_name")
     id_theme = extract_unique_code(message.text)
+    name_theme = None
     if id_theme:
         if check_insert_or_update(StateTopic, telegram_id):
             update(StateTopic, telegram_id, topic_id=id_theme)
@@ -90,7 +92,8 @@ def start_bot(message):
         Topics.SetState(message.chat.id, id_theme)
     else:
         id_theme = get_current_topic(telegram_id)
-        name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
+        if id_theme:
+            name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
     id_ = select_max_id(Users)
     if id_ is None:
         id_ = 0
