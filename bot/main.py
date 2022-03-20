@@ -220,7 +220,7 @@ def gotopic_callback(call):
         bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
         for mess in data_sorted:
             msg = f'@{mess["users_username"]}: {mess["message_message_text"]}'
-            menu = [{'text': "Написать ответ", 'callback_data': f'&answer={mess["message_chat_id"]}'}]
+            menu = [{'text': "Написать ответ", 'callback_data': f'&answer={mess["message_message_telegram_id"]}'}]
             keyboard = Keyboa(items=menu)
             bot.send_message(chat_id=call.message.chat.id, text=msg, reply_markup=keyboard())
 
@@ -257,10 +257,8 @@ def other1(call):
             States.SetState(call.chat.id, State.Start)
         elif States.GetState(call.chat.id) == State.CreateAnswer:
             message_id = Topics.GetState(call.chat.id)
-            # TODO - непосредственный ответ реплаем на сообщение юзера!!!!
-            message_from_db = select_all(Message, Message.chat_id == message_id)[0]
-            bot.reply_to(message_from_db["message_message_telegram_id"], "Howdy, how are you doing?")
-            bot.send_message(chat_id=message_id, text=call.text)
+            message_from_db = select_all(Message, Message.message_telegram_id == message_id)[0]
+            bot.send_message(message_from_db["message_chat_id"], text=call.text, reply_to_message_id=message_from_db["message_message_telegram_id"])
             States.SetState(call.chat.id, State.Start)
             Topics.SetState(call.chat.id, 0)
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)
