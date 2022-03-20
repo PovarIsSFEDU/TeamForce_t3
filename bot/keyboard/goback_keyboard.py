@@ -4,7 +4,7 @@ from .creators_keyboard import creators_keyboard
 
 def goback_callback_keyboard(bot, call, parent, AUTH_ADMIN, id_theme):
     if parent == "start":
-        text = "Добро пожаловать! Пожалуйста, выберите команду! <TODO: сделать входной текст>"
+        text = "Добро пожаловать! Пожалуйста, выберите команду!"
         reply_markup = check_rules(AUTH_ADMIN, id_theme)
     elif parent == "creators":
         text = "Создатели: CyberFarshTeam"

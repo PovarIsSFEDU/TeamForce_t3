@@ -110,7 +110,7 @@ def start_bot(message):
 
     if get_user_id(telegram_id) is not None and id_theme is not None and select_all(Topic.id,
                                                                                     operator=Topic.id == id_theme) and not check_user_topic:
-        statement = users_topic.insert().values(users_id=id_ + 1, topic_id=id_theme)
+        statement = users_topic.insert().values(users_id=id_, topic_id=id_theme)
         db_session.execute(statement)
         db_session.commit()
 
