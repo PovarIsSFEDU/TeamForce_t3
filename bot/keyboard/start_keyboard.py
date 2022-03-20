@@ -21,7 +21,7 @@ def start_keyboard_admin():
 
 
 def start_keyboard_user_theme():
-    menu = [{'text': "Написать", 'callback_data': "create_message"}]
+    menu = [{'text': "Список моих тем", 'callback_data': "my_list_topic"}]
     for point in menu:
         point["callback_data"] = "&target=" + point["callback_data"] + "$start_"
     keyboard = Keyboa(items=menu)
@@ -52,7 +52,7 @@ def start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme):
             msg1 = "Пожалуйста пишите в чат."
             msg = f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: <b>{name_theme}</b>. {msg1}"
             bot.send_message(chat_id=message.chat.id,
-                             text=msg,
+                             text=msg, reply_markup=check_rules(AUTH_ADMIN, id_theme=id_theme),
                              parse_mode="HTML")
     else:
         if AUTH_ADMIN:
