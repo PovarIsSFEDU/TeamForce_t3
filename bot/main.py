@@ -7,6 +7,7 @@ from keyboa import Keyboa
 from datetime import date
 from business import insert, select_all, db_session, Users, Topic, Message, init_migrate, select_max_id, delete
 from business import convert_to_list, get_theme_by_user, users_topic, get_message_and_user_by_topic
+from business import check_insert_or_update, StateTopic, update
 
 from help import extract_unique_code
 from keyboard import create_topic_keyboard, topics_list_keyboard, start_keyboard, help_callback_keyboard
@@ -58,6 +59,11 @@ def get_admin_list():
     return res
 
 
+def get_current_topic(telegram_id):
+    id_theme = select_all(StateTopic.topic_id, operator=StateTopic.telegram_id == telegram_id)[0]
+    return id_theme
+
+
 def check_auth(telegram_id):
     res = select_all(Users, Users.telegram_id == telegram_id)
     return res[0].get("users_admin") if res else False
@@ -65,7 +71,6 @@ def check_auth(telegram_id):
 
 @bot.message_handler(commands=['start', 'help'])
 def start_bot(message):
-    teams = select_all(Topic)
     msg_json = message.json
     username, first_name = msg_json["from"].get("username"), msg_json["from"].get("first_name")
     telegram_id = msg_json["from"].get("id")
@@ -74,19 +79,30 @@ def start_bot(message):
     id_theme = extract_unique_code(message.text)
     name_theme = None
     if id_theme:
+        if check_insert_or_update(StateTopic, telegram_id):
+            update(StateTopic, telegram_id, topic_id=id_theme)
+        else:
+            id_ = select_max_id(StateTopic)
+            if id_ is None:
+                id_ = 0
+            insert(StateTopic, topic_id=id_theme, telegram_id=telegram_id, id_=id_ + 1)
         name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
         Topics.AddUser(message.chat.id)
         Topics.SetState(message.chat.id, id_theme)
-    id_ = select_max_id(Users) 
+
+    id_ = select_max_id(Users)
     if id_ is None:
         id_ = 0
     if get_user_id(telegram_id) is None:
-        insert(Users, user_id=id_ + 1, telegram_id=telegram_id, first_name=first_name, last_name=last_name, username=username, admin=AUTH_ADMIN,
+        insert(Users, user_id=id_ + 1, telegram_id=telegram_id, first_name=first_name, last_name=last_name,
+               username=username, admin=AUTH_ADMIN,
                phone="")
-    statement1 = users_topic.select().where(and_(users_topic.columns.topic_id == id_theme, users_topic.columns.users_id == get_user_id(telegram_id)))
+    statement1 = users_topic.select().where(
+        and_(users_topic.columns.topic_id == id_theme, users_topic.columns.users_id == get_user_id(telegram_id)))
     check_user_topic = db_session.execute(statement1).fetchall()
 
-    if get_user_id(telegram_id) is not None and id_theme is not None and select_all(Topic.id, operator=Topic.id == id_theme) and not check_user_topic:
+    if get_user_id(telegram_id) is not None and id_theme is not None and select_all(Topic.id,
+                                                                                    operator=Topic.id == id_theme) and not check_user_topic:
         statement = users_topic.insert().values(users_id=id_ + 1, topic_id=id_theme)
         db_session.execute(statement)
         db_session.commit()
@@ -128,8 +144,8 @@ def other1(call):
     id_ = id_ if id_ is not None else 0
     try:
         if States.GetState(call.chat.id) == State.CreateTopic:
-            insert(Topic, theme_id=id_+1, name=name, url=f"{URL}?start={id_+1}")
-            statement = users_topic.insert().values(users_id=user_id, topic_id=id_+1)
+            insert(Topic, theme_id=id_ + 1, name=name, url=f"{URL}?start={id_ + 1}")
+            statement = users_topic.insert().values(users_id=user_id, topic_id=id_ + 1)
             db_session.execute(statement)
             db_session.commit()
 
@@ -141,10 +157,13 @@ def other1(call):
             id_msg = select_max_id(Message)
             id_msg = id_msg if id_msg is not None else 0
             id_theme = Topics.GetState(call.chat.id)
+            if id_theme is None:
+                id_theme = get_current_topic(telegram_id)
             # TODO - сохранение статуса сообщения
-            insert(Message, id_=id_msg+1, date=date.today(), topic_id=Topics.GetState(call.chat.id), user_id=user_id, status="",
+            insert(Message, id_=id_msg + 1, date=date.today(), topic_id=id_theme, user_id=user_id, status="",
                    type="admin" if AUTH_ADMIN else "user", message_text=call.text, chat_id=call.chat.id)
-            start_keyboard(bot, call, AUTH_ADMIN, id_theme=id_theme, name_theme=select_all(Topic.name, operator=Topic.id == id_theme)[0])
+            start_keyboard(bot, call, AUTH_ADMIN, id_theme=id_theme,
+                           name_theme=select_all(Topic.name, operator=Topic.id == id_theme)[0])
             States.SetState(call.chat.id, State.Start)
         else:
             bot.send_message(call.chat.id, "State not correct")

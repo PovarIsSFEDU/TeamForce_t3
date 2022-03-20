@@ -10,7 +10,7 @@ def insert(model, **kwargs):
 
 
 def update(model, id_, **kwargs):
-    db_session.query(model).filter(model.id == id_).update(**kwargs)
+    db_session.query(model).filter(model.telegram_id == id_).update({**kwargs})
     db_session.commit()
 
 
@@ -35,8 +35,9 @@ def convert_to_list(func):
                     for shingle in res:
                         dict_prom = {}
                         for el in shingle:
-                            if isinstance(el, str) or isinstance(el, int):
-                                result.append(el)
+                            if isinstance(el, str) or isinstance(el, int) or el is None:
+                                if el is not None:
+                                    result.append(el)
                             else:
                                 dict_prom.update(el.to_dict())
                         if dict_prom:
@@ -81,5 +82,5 @@ def select_all(model, operator=None):
     return res
 
 
-
-
+def check_insert_or_update(model, telegram_id):
+    return bool(select_all(model, operator=model.telegram_id == telegram_id))

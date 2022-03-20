@@ -115,5 +115,29 @@ class Message(Model):
         return self.__tablename__
 
 
+class StateTopic(Model):
+    __tablename__ = 'state_topic'
+    id = Column(Integer, primary_key=True)
+    topic_id = Column(Integer)
+    telegram_id = Column(Integer)
+
+    def __init__(self, id_, telegram_id, topic_id):
+        self.id = id_
+        self.telegram_id = telegram_id
+        self.url = topic_id
+
+    def to_dict(self):
+        res_prom = self.__dict__
+        if res_prom.get("_sa_instance_state") is not None:
+            res_prom.pop("_sa_instance_state")
+        res = {}
+        for key in res_prom:
+            res[f'{self.__tablename__}_{key}'] = res_prom[key]
+        return res
+
+    def __str__(self):
+        return self.__tablename__
+
+
 def init_migrate():
     Model.metadata.create_all(engine)
