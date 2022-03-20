@@ -77,7 +77,6 @@ def start_bot(message):
     AUTH_ADMIN = check_auth(telegram_id)
     last_name = msg_json["from"].get("last_name")
     id_theme = extract_unique_code(message.text)
-    name_theme = None
     if id_theme:
         if check_insert_or_update(StateTopic, telegram_id):
             update(StateTopic, telegram_id, topic_id=id_theme)
@@ -89,7 +88,9 @@ def start_bot(message):
         name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
         Topics.AddUser(message.chat.id)
         Topics.SetState(message.chat.id, id_theme)
-
+    else:
+        id_theme = get_current_topic(telegram_id)
+        name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
     id_ = select_max_id(Users)
     if id_ is None:
         id_ = 0
@@ -153,7 +154,7 @@ def other1(call):
 
             start_keyboard(bot, call, AUTH_ADMIN, id_theme=None, name_theme=None)
             States.SetState(call.chat.id, State.Start)
-        elif States.GetState(call.chat.id) == State.CreateMessage:
+        else:
             id_msg = select_max_id(Message)
             id_msg = id_msg if id_msg is not None else 0
             id_theme = Topics.GetState(call.chat.id)
@@ -162,11 +163,11 @@ def other1(call):
             # TODO - сохранение статуса сообщения
             insert(Message, id_=id_msg + 1, date=date.today(), topic_id=id_theme, user_id=user_id, status="",
                    type="admin" if AUTH_ADMIN else "user", message_text=call.text, chat_id=call.chat.id)
-            start_keyboard(bot, call, AUTH_ADMIN, id_theme=id_theme,
-                           name_theme=select_all(Topic.name, operator=Topic.id == id_theme)[0])
+            # start_keyboard(bot, call, AUTH_ADMIN, id_theme=id_theme,
+            #                name_theme=select_all(Topic.name, operator=Topic.id == id_theme)[0])
             States.SetState(call.chat.id, State.Start)
-        else:
-            bot.send_message(call.chat.id, "State not correct")
+        # else:
+        #     bot.send_message(call.chat.id, "State not correct")
     except Exception as e:
         bot.reply_to(chat_id=call.chat.id,
                      message_id=call.message_id,

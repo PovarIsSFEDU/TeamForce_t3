@@ -46,16 +46,18 @@ def start_keyboard(bot, message, AUTH_ADMIN, id_theme, name_theme):
     if id_theme:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
-                             text="Добро пожаловать! Пожалуйста, выберите команду! TODO: сделать входной текст!",
+                             text="Добро пожаловать! Пожалуйста, выберите команду!",
                              reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
         else:
+            msg1 = "Пожалуйста пишите в чат."
+            msg = f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: <b>{name_theme}</b>. {msg1}"
             bot.send_message(chat_id=message.chat.id,
-                             text=f"Добро пожаловать {user_name}! Вы собираетесь ответить в тему: <b>{name_theme}</b>",
-                             reply_markup=check_rules(AUTH_ADMIN, id_theme), parse_mode="HTML")
+                             text=msg,
+                             parse_mode="HTML")
     else:
         if AUTH_ADMIN:
             bot.send_message(chat_id=message.chat.id,
-                             text="Добро пожаловать! Пожалуйста, выберите команду! TODO: сделать входной текст!",
+                             text="Добро пожаловать! Пожалуйста, выберите команду!",
                              reply_markup=check_rules(AUTH_ADMIN, id_theme=None), parse_mode="HTML")
         else:
             bot.send_message(chat_id=message.chat.id,
