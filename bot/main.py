@@ -217,6 +217,17 @@ def goback_callback(call):
     goback_callback_keyboard(bot, call, parent, check_auth(call.__dict__["from_user"].__dict__["id"]), id_theme=None)
 
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith("&my_list="))
+def my_list_topic(call):
+    topic_ids = get_theme_by_user(get_user_id(call.from_user.id))
+    topic_ids = [el.get("topic_id") for el in topic_ids if el.get("topic_id") is not None]
+    for parent in topic_ids:
+        prom_url = select_all(Topic.url, operator=Topic.id == parent)[0]
+        topic = select_all(Topic.name, operator=Topic.id == parent)[0]
+        msg = f'<b>{topic}</b>: {prom_url}'
+        bot.send_message(chat_id=call.message.chat.id, text=msg, parse_mode='HTML')
+
+
 @bot.callback_query_handler(is_admin=True, func=lambda call: call.data.startswith("&gotopic="))
 def gotopic_callback(call):
     parent = call.data.split("&")[-1].split("=")[-1]

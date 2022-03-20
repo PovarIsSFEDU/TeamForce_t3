@@ -21,9 +21,7 @@ def start_keyboard_admin():
 
 
 def start_keyboard_user_theme():
-    menu = [{'text': "Список моих тем", 'callback_data': "my_list_topic"}]
-    for point in menu:
-        point["callback_data"] = "&target=" + point["callback_data"] + "$start_"
+    menu = [{'text': "Список моих тем", 'callback_data': "&my_list=all"}]
     keyboard = Keyboa(items=menu)
     return keyboard()
 
