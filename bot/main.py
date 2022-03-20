@@ -90,7 +90,7 @@ def start_bot(message):
         name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
         Topics.AddUser(message.chat.id)
         Topics.SetState(message.chat.id, id_theme)
-    else:
+    elif select_max_id(Topic) is not None and select_all(Topic.id, Topic.id == id_theme):
         id_theme = get_current_topic(telegram_id)
         if id_theme:
             name_theme = select_all(Topic.name, operator=Topic.id == id_theme)[0]
